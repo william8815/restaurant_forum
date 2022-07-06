@@ -6,11 +6,13 @@ import Restaurants from '../views/Restaurants.vue'
 Vue.use(VueRouter)
 
 const routes = [
+  // 封面
   {
     path: '/',
     name: 'root',
     redirect: '/restaurants'
   },
+  // 登入介面
   {
     path: "/signin",
     name: "sign-in",
@@ -21,6 +23,7 @@ const routes = [
     name: "sign-up",
     component: () => import("../views/SignUp.vue")
   },
+  // 餐廳介面資訊
   {
     path: '/restaurants',
     name: 'restaurants',
@@ -46,11 +49,7 @@ const routes = [
     name: 'dashboard',
     component: () => import('../views/RestaurantDashboard.vue')
   },
-  {
-    path: '*',
-    name: "NotFound",
-    component: () => import("../views/NotFound.vue")
-  },
+  // 用戶資訊
   {
     path: '/users/top',
     name: 'users-top',
@@ -60,6 +59,55 @@ const routes = [
     path: '/users/:id',
     name: 'user-profile',
     component: () => import("../views/User.vue")
+  },
+  // 用戶編輯
+  {
+    path: '/users/:id/edit',
+    name: 'user-edit',
+    component: () => import('../views/UserEdit.vue')
+  },
+  // 管理者 : 餐廳列表
+  {
+    path: '/admin',
+    exact: true,
+    redirect: '/admin/restaurants'
+  },
+  {
+    path: '/admin/restaurants',
+    name: 'admin-restaurants',
+    component: () => import('../views/AdminRestaurants.vue')
+  },
+  {
+    path: '/admin/restaurants/new',
+    name: 'admin-restaurant-new',
+    component: () => import('../views/AdminRestaurantNew.vue')
+  },
+  {
+    path: '/admin/restaurants/:id',
+    name: 'admin-restaurant',
+    component: () => import('../views/AdminRestaurant.vue')
+  },
+  {
+    path: '/admin/restaurants/:id/edit',
+    name: 'admin-restaurant-edit',
+    component: () => import('../views/AdminRestaurantEdit.vue')
+  },
+  // 管理者: 餐廳類別
+  {
+    path: '/admin/categories',
+    name: 'admin-categories',
+    component: () => import('../views/AdminCategories.vue')
+  },
+  {
+    path: '/admin/users',
+    name: 'admin-users',
+    component: () => import('../views/AdminUsers.vue')
+  },
+  // 錯誤頁面
+  {
+    path: '*',
+    name: "NotFound",
+    component: () => import("../views/NotFound.vue")
   }
 ]
 

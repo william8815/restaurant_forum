@@ -26,7 +26,8 @@ const dummyData = {
       email: "root@example.com",
       password: "$2a$10$psxF6lN5Tjp53JQllpgdzuKt69yoF2OaWQLi2AsbPBpgYRiA0.R2O",
       isAdmin: true,
-      image: null,
+      image:
+        "https://loremflickr.com/320/240/restaurant,food/?random=91.29816290184887",
       createdAt: "2022-06-30T15:59:31.000Z",
       updatedAt: "2022-06-30T15:59:31.000Z",
       Followers: [],
@@ -39,7 +40,8 @@ const dummyData = {
       email: "user1@example.com",
       password: "$2a$10$6.ZUnvx.LAarlhS16o5mUuspyJQ2Qx9ubUSAnAbGl78pSxHJ97sY.",
       isAdmin: false,
-      image: null,
+      image:
+        "https://loremflickr.com/320/240/restaurant,food/?random=91.29816290184887",
       createdAt: "2022-06-30T15:59:31.000Z",
       updatedAt: "2022-06-30T15:59:31.000Z",
       Followers: [],
@@ -52,7 +54,8 @@ const dummyData = {
       email: "user2@example.com",
       password: "$2a$10$fUaVWswhsyfyk0ge8OxS6eMfrzUf.JoYGaOyy2UWooXf0dSftc5g.",
       isAdmin: false,
-      image: null,
+      image:
+        "https://loremflickr.com/320/240/restaurant,food/?random=91.29816290184887",
       createdAt: "2022-06-30T15:59:31.000Z",
       updatedAt: "2022-06-30T15:59:31.000Z",
       Followers: [],

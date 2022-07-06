@@ -1,12 +1,8 @@
 <template>
   <div class="col-3">
-    <a href="#">
-      <img
-        src="貼上引用圖片網址，同學可自行選擇圖片進行實作"
-        width="140px"
-        height="140px"
-      />
-    </a>
+    <router-link :to="{ name: 'user-profile', params: { id: user.id } }">
+      <img :src="user.image" width="140px" height="140px" />
+    </router-link>
     <h2>{{ user.name }}</h2>
     <span class="badge badge-secondary"
       >追蹤人數：{{ user.FollowerCount }}</span

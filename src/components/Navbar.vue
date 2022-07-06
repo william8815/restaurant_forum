@@ -17,13 +17,20 @@
     <div id="navbarSupportedContent" class="navbar-collapse collapse">
       <div class="ml-auto d-flex align-items-center">
         <!-- is user is admin -->
-        <router-link v-if="currentUser.isAdmin" to="#" class="text-white mr-3">
+        <router-link
+          v-if="currentUser.isAdmin"
+          to="/admin"
+          class="text-white mr-3"
+        >
           管理員後台
         </router-link>
 
         <!-- is user is login -->
         <template v-if="isAuthenticated">
-          <router-link to="#" class="text-white mr-3">
+          <router-link
+            :to="{ name: 'user-edit', params: { id: currentUser.id } }"
+            class="text-white mr-3"
+          >
             {{ currentUser.name || 使用者 }} 您好
           </router-link>
           <button
@@ -75,7 +82,8 @@ export default {
     },
   },
   created() {
-    this.fetchUser();
+    const { id: userId } = this.$route.params;
+    this.fetchUser(userId);
   },
 };
 </script>

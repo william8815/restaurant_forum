@@ -1,5 +1,5 @@
 <template>
-  <form @submit.stop.prevent="handleSubmit">
+  <form @submit.stop.prevent="handleSubmit" v-show="!isLoading">
     <div class="form-group">
       <label for="name">Name</label>
       <input
@@ -99,48 +99,26 @@
       />
     </div>
 
-    <button type="submit" class="btn btn-primary">送出</button>
+    <button :disabled="isProcessing" type="submit" class="btn btn-primary">
+      {{ isProcessing ? "處理中..." : "送出" }}
+    </button>
   </form>
 </template>
 
 <script>
 // postman : {{api_url}}/admin/categories
-const dummyData = {
-  categories: [
-    {
-      id: 1,
-      name: "中式料理",
-      createdAt: "2019-06-22T09:00:43.000Z",
-      updatedAt: "2019-06-22T09:00:43.000Z",
-    },
-    {
-      id: 2,
-      name: "日本料理",
-      createdAt: "2019-06-22T09:00:43.000Z",
-      updatedAt: "2019-06-22T09:00:43.000Z",
-    },
-    {
-      id: 3,
-      name: "義大利料理",
-      createdAt: "2019-06-22T09:00:43.000Z",
-      updatedAt: "2019-06-22T09:00:43.000Z",
-    },
-    {
-      id: 4,
-      name: "墨西哥料理",
-      createdAt: "2019-06-22T09:00:43.000Z",
-      updatedAt: "2019-06-22T09:00:43.000Z",
-    },
-  ],
-};
+import adminAPI from "./../apis/admin";
+import { Toast } from "./../utilitys/helpers";
+
 export default {
   props: {
     initialRestaurant: {
       type: Object,
       // 沒有用 required 來設定必填，當資料不是必填時，比較好的習慣是要用 default 設定一組預設值。
       default: () => ({
+        id: -1,
         name: "",
-        categoryId: "",
+        categoryId: -1,
         tel: "",
         address: "",
         description: "",
@@ -148,11 +126,16 @@ export default {
         openingHours: "",
       }),
     },
+    isProcessing: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       categories: {},
       restaurant: {
+        id: -1,
         name: "",
         categoryId: -1,
         tel: "",
@@ -161,6 +144,7 @@ export default {
         description: "",
         image: "",
       },
+      isLoading: true,
     };
   },
   created() {
@@ -171,8 +155,19 @@ export default {
     };
   },
   methods: {
-    fetchCategories() {
-      this.categories = dummyData.categories;
+    async fetchCategories() {
+      try {
+        const { data } = await adminAPI.categories.get();
+        this.categories = data.categories;
+        this.isLoading = false;
+      } catch (error) {
+        this.isLoading = false;
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "無法取得餐廳類別，請稍後再試",
+        });
+      }
     },
     handleFileChange(e) {
       const { files } = e.target;
@@ -184,10 +179,34 @@ export default {
       }
     },
     handleSubmit(e) {
+      // 預防 required 屬性被刪掉
+      if (!this.restaurant.name) {
+        Toast.fire({
+          icon: "warning",
+          title: "請填寫餐廳名稱",
+        });
+        return;
+      } else if (!this.restaurant.categoryId) {
+        Toast.fire({
+          icon: "warning",
+          title: "請選擇餐廳類別",
+        });
+        return;
+      }
+
       const form = e.target; // <form></form>
       // formData : 將表單整個資料整合包起來，可傳送給後端伺服器
       const formData = new FormData(form);
       this.$emit("after-submit", formData);
+    },
+  },
+  watch: {
+    // 一旦餐廳資料變更，就會自動更新表單的資料
+    initialRestaurant(newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue,
+      };
     },
   },
 };

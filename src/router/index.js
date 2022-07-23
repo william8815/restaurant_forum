@@ -138,9 +138,10 @@ const router = new VueRouter({
 // 可以對網址變化作非同步
 router.beforeEach(async (to, from, next) => {
   const token = localStorage.getItem('token')
-  let isAuthenticated = false
+  let isAuthenticated = store.state.isAuthenticated
+  const tokenInStore = store.state.token
   // 如果有 token 的話才驗證
-  if (token) {
+  if (token && token !== tokenInStore) {
     // 取得驗證成功與否
     isAuthenticated = await store.dispatch('fetchCurrentUser') // 使用 dispatch 呼叫 Vuex 內的 actions
   }

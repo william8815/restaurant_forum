@@ -28,14 +28,15 @@
         <!-- is user is login -->
         <template v-if="isAuthenticated">
           <router-link
-            :to="{ name: 'user-edit', params: { id: currentUser.id } }"
+            :to="{ name: 'user-profile', params: { id: currentUser.id } }"
             class="text-white mr-3"
           >
-            {{ currentUser.name || 使用者 }} 您好
+            {{ currentUser.name || "使用者" }} 您好
           </router-link>
           <button
             type="button"
             class="btn btn-sm btn-outline-success my-2 my-sm-0"
+            @click="logout"
           >
             登出
           </button>
@@ -46,44 +47,39 @@
 </template>
 
 <script>
-// 模擬登入使用者
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "管理者",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+// 改用 vuex 中 state 狀態的資料
+import { mapState } from "vuex";
+
 export default {
-  data() {
-    return {
-      // 預設資料
-      currentUser: {
-        id: -1,
-        name: "",
-        email: "",
-        image: "",
-        isAdmin: false,
-      },
-      isAuthenticated: false,
-    };
+  // Step2：移除 data 屬性
+  // Step3：移除 created 和 fetchUser 的方法
+
+  // Step4：新增 `mapState` 方法
+  computed: {
+    ...mapState(["currentUser", "isAuthenticated"]),
   },
   methods: {
-    // 藉由 擴展運算子 來讓預設跟使用者資料物件打開，抓取到的資料會覆蓋預設資料
-    fetchUser() {
-      this.currentUser = {
-        ...this.currentUser,
-        ...dummyUser.currentUser,
-      };
-      this.isAuthenticated = dummyUser.isAuthenticated;
+    logout() {
+      this.$store.commit("revokeAuthentication");
+      this.$router.push("/signin");
     },
-  },
-  created() {
-    const { id: userId } = this.$route.params;
-    this.fetchUser(userId);
   },
 };
 </script>
+
+<style scoped>
+.navbar-toggler {
+  min-width: 70px;
+  margin-right: 0;
+}
+
+nav.bg-dark {
+  padding: 14px 16px;
+  background-color: #bd2333 !important;
+}
+
+.navbar-brand {
+  font-size: 19px;
+  padding: 0;
+}
+</style>

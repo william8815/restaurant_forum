@@ -5,9 +5,13 @@
       <div v-for="comment in comment_list" :key="comment.id">
         <h4>
           <router-link
-            :to="{ name: 'restaurant', params: { id: comment.Restaurant.id } }"
+            :to="{ name: 'restaurant', params: { id: comment.RestaurantId } }"
           >
-            {{ comment.Restaurant.name }}
+            {{
+              comment.Restaurant === null
+                ? "名字不見了"
+                : comment.Restaurant.name
+            }}
           </router-link>
         </h4>
         <p>{{ comment.text }}</p>

@@ -15,25 +15,33 @@
         <tr v-for="user of userInfo" :key="user.id">
           <th scope="row">{{ user.id }}</th>
           <td>{{ user.email }}</td>
-          <td v-if="!user.isAdmin">admin</td>
+          <td v-if="user.isAdmin">admin</td>
           <td v-else>user</td>
           <td>
             <button
-              @click="toggleAdmin(user.id)"
-              v-if="!user.isAdmin"
+              v-if="currentUser.id !== user.id"
+              type="button"
+              class="btn btn-link"
+              @click="toggleAdmin(user.id, { isAdmin: user.isAdmin })"
+            >
+              {{ user.isAdmin ? "set as user" : "set as admin" }}
+            </button>
+            <!-- <button
+              @click="toggleAdmin({ userId: user.id, isAdmin: user.isAdmin })"
+              v-if="user.isAdmin"
               type="button"
               class="btn btn-link"
             >
               set as user
             </button>
             <button
-              @click="toggleAdmin(user.id)"
+              @click="toggleAdmin({ userId: user.id, isAdmin: user.isAdmin })"
               v-else
               type="button"
               class="btn btn-link"
             >
               set as Admin
-            </button>
+            </button> -->
           </td>
         </tr>
       </tbody>
@@ -42,42 +50,45 @@
 </template>
 
 <script>
-const dummyUser = {
-  users: [
-    {
-      id: 1,
-      name: "root",
-      email: "root@example.com",
-      password: "$2a$10$psxF6lN5Tjp53JQllpgdzuKt69yoF2OaWQLi2AsbPBpgYRiA0.R2O",
-      isAdmin: true,
-      image: null,
-      createdAt: "2022-06-30T15:59:31.000Z",
-      updatedAt: "2022-06-30T15:59:31.000Z",
-    },
-    {
-      id: 2,
-      name: "user1",
-      email: "user1@example.com",
-      password: "$2a$10$6.ZUnvx.LAarlhS16o5mUuspyJQ2Qx9ubUSAnAbGl78pSxHJ97sY.",
-      isAdmin: false,
-      image: null,
-      createdAt: "2022-06-30T15:59:31.000Z",
-      updatedAt: "2022-06-30T15:59:31.000Z",
-    },
-    {
-      id: 3,
-      name: "user2",
-      email: "user2@example.com",
-      password: "$2a$10$fUaVWswhsyfyk0ge8OxS6eMfrzUf.JoYGaOyy2UWooXf0dSftc5g.",
-      isAdmin: false,
-      image: null,
-      createdAt: "2022-06-30T15:59:31.000Z",
-      updatedAt: "2022-06-30T15:59:31.000Z",
-    },
-  ],
-};
-
 import AdminNav from "./../components/AdminNav.vue";
+import adminAPI from "./../apis/admin";
+import { Toast } from "./../utilitys/helpers";
+import { mapState } from "vuex";
+
+// const dummyUser = {
+//   users: [
+//     {
+//       id: 1,
+//       name: "root",
+//       email: "root@example.com",
+//       password: "$2a$10$psxF6lN5Tjp53JQllpgdzuKt69yoF2OaWQLi2AsbPBpgYRiA0.R2O",
+//       isAdmin: true,
+//       image: null,
+//       createdAt: "2022-06-30T15:59:31.000Z",
+//       updatedAt: "2022-06-30T15:59:31.000Z",
+//     },
+//     {
+//       id: 2,
+//       name: "user1",
+//       email: "user1@example.com",
+//       password: "$2a$10$6.ZUnvx.LAarlhS16o5mUuspyJQ2Qx9ubUSAnAbGl78pSxHJ97sY.",
+//       isAdmin: false,
+//       image: null,
+//       createdAt: "2022-06-30T15:59:31.000Z",
+//       updatedAt: "2022-06-30T15:59:31.000Z",
+//     },
+//     {
+//       id: 3,
+//       name: "user2",
+//       email: "user2@example.com",
+//       password: "$2a$10$fUaVWswhsyfyk0ge8OxS6eMfrzUf.JoYGaOyy2UWooXf0dSftc5g.",
+//       isAdmin: false,
+//       image: null,
+//       createdAt: "2022-06-30T15:59:31.000Z",
+//       updatedAt: "2022-06-30T15:59:31.000Z",
+//     },
+//   ],
+// };
 export default {
   components: {
     AdminNav,
@@ -87,23 +98,51 @@ export default {
       userInfo: [],
     };
   },
+  computed: {
+    ...mapState(["currentUser"]),
+  },
   created() {
     this.fetchUser();
   },
   methods: {
-    fetchUser() {
-      this.userInfo = dummyUser.users;
+    async fetchUser() {
+      try {
+        const { data } = await adminAPI.getAdminUsers();
+        this.userInfo = data.users;
+      } catch (error) {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "請求使用者失敗",
+        });
+      }
     },
-    toggleAdmin(userId) {
-      this.userInfo = this.userInfo.map((user) => {
-        if (user.id === userId) {
-          return {
-            ...user,
-            isAdmin: !user.isAdmin,
-          };
+    async toggleAdmin(userId, { isAdmin }) {
+      try {
+        console.log(this.userInfo);
+        const { data } = await adminAPI.updateAdminUsers(userId, {
+          isAdmin: String(!isAdmin),
+        });
+        if (data.status !== "success") {
+          throw new Error(data.message);
         }
-        return user;
-      });
+        this.userInfo = this.userInfo.map((user) => {
+          if (user.id === userId) {
+            return {
+              ...user,
+              isAdmin: !user.isAdmin,
+            };
+          }
+
+          return user;
+        });
+      } catch (error) {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "切換權限失敗",
+        });
+      }
     },
   },
 };

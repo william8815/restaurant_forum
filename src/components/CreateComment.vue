@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 export default {
   props: {
     restaurant_id: {
@@ -31,7 +31,6 @@ export default {
     handleSubmit() {
       this.$emit("after-create-comment", {
         // Id 原本是從後端拿取，現在先用 uuid 產生隨機馬
-        commentId: uuidv4(),
         restaurantId: this.restaurant_id,
         text: this.text,
       });
@@ -40,3 +39,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.form-group {
+  margin: 21px 0 8px;
+}
+</style>

@@ -1,11 +1,11 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <strong>{{ comments.length }}</strong> 已評論餐廳
+      <strong>{{ user_comment.length }}</strong> 已評論餐廳
     </div>
     <div class="card-body">
       <router-link
-        v-for="comment in comments"
+        v-for="comment in user_comment"
         :key="comment.id"
         :to="{ name: 'restaurant', params: { id: comment.RestaurantId } }"
       >

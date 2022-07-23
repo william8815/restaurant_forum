@@ -32,11 +32,15 @@
     <div class="col-lg-8">
       <p>{{ restaurant.description }}</p>
       <!--  -->
-      <a class="btn btn-primary btn-border mr-2" href="#">Dashboard</a>
+      <router-link
+        :to="{ name: 'dashboard', params: { id: restaurant.id } }"
+        class="btn btn-primary btn-border mr-2"
+        >Dashboard</router-link
+      >
 
       <button
         v-if="restaurant.isFavorited"
-        @click.prevent="deleteFavorite"
+        @click.prevent="deleteFavorite(restaurant.id)"
         type="button"
         class="btn btn-danger btn-border mr-2"
       >
@@ -44,7 +48,7 @@
       </button>
       <button
         v-else
-        @click.prevent="addFavorite"
+        @click.prevent="addFavorite(restaurant.id)"
         type="button"
         class="btn btn-primary btn-border mr-2"
       >
@@ -52,7 +56,7 @@
       </button>
       <button
         v-if="restaurant.isLiked"
-        @click.prevent="deleteLike"
+        @click.prevent="deleteLike(restaurant.id)"
         type="button"
         class="btn btn-danger like mr-2"
       >
@@ -60,7 +64,7 @@
       </button>
       <button
         v-else
-        @click.prevent="addLike"
+        @click.prevent="addLike(restaurant.id)"
         type="button"
         class="btn btn-primary like mr-2"
       >
@@ -71,6 +75,8 @@
 </template>
 
 <script>
+import userAPI from "./../apis/users";
+import { Toast } from "./../utilitys/helpers";
 export default {
   props: {
     initial_restaurant: {
@@ -84,30 +90,95 @@ export default {
     };
   },
   methods: {
-    addFavorite() {
-      this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
-        isFavorited: true,
-      };
+    async addFavorite(restaurantId) {
+      try {
+        const { data } = await userAPI.addFavorite({ restaurantId });
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant, // 保留餐廳內原有資料
+          isFavorited: true,
+        };
+      } catch (error) {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "無法新增最愛，請稍後再試",
+        });
+      }
     },
-    deleteFavorite() {
-      this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
-        isFavorited: false,
-      };
+    async deleteFavorite(restaurantId) {
+      try {
+        const { data } = await userAPI.deleteFavorite({ restaurantId });
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant, // 保留餐廳內原有資料
+          isFavorited: false,
+        };
+      } catch (error) {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "無法移除最愛，請稍後再試",
+        });
+      }
     },
-    addLike() {
+    async addLike(restaurantId) {
+      try {
+        const { data } = await userAPI.addLike({ restaurantId });
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: true,
+        };
+      } catch (error) {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "無法按讚，請稍後再試",
+        });
+      }
+    },
+    async deleteLike(restaurantId) {
+      try {
+        const { data } = await userAPI.deleteLike({ restaurantId });
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: false,
+        };
+      } catch (error) {
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "無法按讚，請稍後再試",
+        });
+      }
+    },
+  },
+  watch: {
+    initial_restaurant: function (newValue) {
       this.restaurant = {
         ...this.restaurant,
-        isLiked: true,
-      };
-    },
-    deleteLike() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: false,
+        ...newValue,
       };
     },
   },
 };
 </script>
+
+<style scoped>
+.col-lg-8 p,
+.contact-info-wrap li,
+.contact-info-wrap strong {
+  font-family: serif;
+  font-size: 17px;
+}
+</style>

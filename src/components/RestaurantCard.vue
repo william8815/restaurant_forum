@@ -18,7 +18,7 @@
           </router-link>
         </p>
         <span class="badge badge-secondary">{{
-          restaurant.Category.name
+          restaurant.Category.name ? restaurant.Category.name : "未分類"
         }}</span>
         <p class="card-text text-truncate">
           {{ restaurant.description }}
@@ -27,6 +27,7 @@
       <div class="card-footer">
         <button
           v-if="restaurant.isFavorited"
+          :disabled="isProcessing"
           @click.stop.prevent="deleteFavorite(restaurant.id)"
           type="button"
           class="btn btn-danger btn-border favorite mr-2"
@@ -35,6 +36,7 @@
         </button>
         <button
           v-else
+          :disabled="isProcessing"
           @click.stop.prevent="addFavorite(restaurant.id)"
           type="button"
           class="btn btn-primary btn-border favorite mr-2"
@@ -43,6 +45,7 @@
         </button>
         <button
           v-if="restaurant.isLiked"
+          :disabled="isProcessing"
           @click.stop.prevent="deleteLike(restaurant.id)"
           type="button"
           class="btn btn-danger like mr-2"
@@ -51,6 +54,7 @@
         </button>
         <button
           v-else
+          :disabled="isProcessing"
           @click.stop.prevent="addLike(restaurant.id)"
           type="button"
           class="btn btn-primary like mr-2"
@@ -75,11 +79,13 @@ export default {
   data() {
     return {
       restaurant: this.initial_restaurant,
+      isProcessing: false,
     };
   },
   methods: {
     async addFavorite(restaurantId) {
       try {
+        this.isProcessing = true;
         const { data } = await usersAPI.addFavorite({ restaurantId });
         // console.log(data);
         // STEP 4: 若請求過程有錯，則進到錯誤處理
@@ -91,7 +97,9 @@ export default {
           ...this.restaurant, // 保留餐廳內原有資料
           isFavorited: true,
         };
+        this.isProcessing = false;
       } catch (error) {
+        this.isProcessing = false;
         console.log(error);
         Toast.fire({
           icon: "error",
@@ -101,6 +109,7 @@ export default {
     },
     async deleteFavorite(restaurantId) {
       try {
+        this.isProcessing = true;
         const { data } = await usersAPI.deleteFavorite({ restaurantId });
         if (data.status !== "success") {
           throw new Error(data.message);
@@ -109,7 +118,9 @@ export default {
           ...this.restaurant, // 保留餐廳內原有資料
           isFavorited: false,
         };
+        this.isProcessing = false;
       } catch (error) {
+        this.isProcessing = false;
         console.log(error);
         Toast.fire({
           icon: "error",
@@ -119,6 +130,7 @@ export default {
     },
     async addLike(restaurantId) {
       try {
+        this.isProcessing = true;
         const { data } = await usersAPI.addLike({ restaurantId });
         if (data.status !== "success") {
           throw new Error(data.message);
@@ -127,7 +139,9 @@ export default {
           ...this.restaurant,
           isLiked: true,
         };
+        this.isProcessing = false;
       } catch (error) {
+        this.isProcessing = false;
         console.log(error);
         Toast.fire({
           icon: "error",
@@ -137,6 +151,7 @@ export default {
     },
     async deleteLike(restaurantId) {
       try {
+        this.isProcessing = true;
         const { data } = await usersAPI.deleteLike({ restaurantId });
         if (data.status !== "success") {
           throw new Error(data.message);
@@ -145,7 +160,9 @@ export default {
           ...this.restaurant,
           isLiked: false,
         };
+        this.isProcessing = false;
       } catch (error) {
+        this.isProcessing = false;
         console.log(error);
         Toast.fire({
           icon: "error",
@@ -156,3 +173,34 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.badge.badge-secondary {
+  padding: 0;
+  margin: 8px 0;
+  color: #bd2333;
+  background-color: transparent;
+}
+
+.btn,
+.btn-border.btn:hover {
+  margin: 7px 14px 7px 0;
+}
+
+.card {
+  margin-bottom: 2rem !important;
+}
+.card-img-top {
+  background-color: #efefef;
+}
+
+.card-body {
+  padding: 17.5px;
+}
+
+.card-footer {
+  padding: 9px 17.5px;
+  border-color: rgb(232, 232, 232);
+  background: white;
+}
+</style>

@@ -33,23 +33,28 @@
         />
       </div>
 
-      <button type="submit" class="btn btn-primary">Submit</button>
+      <button :disabled="isProcessing" type="submit" class="btn btn-primary">
+        {{ isProcessing ? "處理中..." : "Submit" }}
+      </button>
     </form>
   </div>
 </template>
 
 <script>
+import { mapState } from "vuex";
+import userAPI from "./../apis/users";
+import { Toast } from "./../utilitys/helpers";
 // 模擬登入使用者
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "管理者",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+// const dummyUser = {
+//   currentUser: {
+//     id: 1,
+//     name: "管理者",
+//     email: "root@example.com",
+//     image: "https://i.pravatar.cc/300",
+//     isAdmin: true,
+//   },
+//   isAuthenticated: true,
+// };
 export default {
   data() {
     return {
@@ -60,22 +65,39 @@ export default {
         image: "",
         isAdmin: false,
       },
+      isProcessing: false,
     };
   },
+  beforeRouteUpdate(to) {
+    if (to.params !== this.currentUser.id) {
+      this.$router.push({ name: "NotFound" });
+      return;
+    }
+    this.setUser();
+  },
   created() {
-    this.fetchUser();
+    const { id } = this.$route.params;
+    if (id !== this.currentUser.id) {
+      this.$router.push({ name: "NotFound" });
+      return;
+    }
+    this.setUser();
+  },
+  computed: {
+    ...mapState(["currentUser"]),
+  },
+  watch: {
+    currentUser() {
+      this.setUser();
+    },
   },
   methods: {
-    fetchUser() {
-      const { currentUser } = dummyUser;
-      const { id, name, email, image, isAdmin } = currentUser;
+    setUser() {
       this.user = {
-        id,
-        name,
-        email,
-        image,
-        isAdmin,
+        ...this.user,
+        ...this.currentUser,
       };
+      // console.log("set", this.user);
     },
     handleFileChange(e) {
       const { files } = e.target;
@@ -86,11 +108,41 @@ export default {
         this.user.image = imgURL;
       }
     },
-    handleFormData(e) {
+
+    async handleFormData(e) {
+      if (!this.user.name.trim()) {
+        Toast.fire({
+          icon: "warning",
+          title: "請填寫姓名",
+        });
+        return;
+      }
       const form = e.target;
       const formData = new FormData(form);
-      for (let [name, value] of formData) {
-        console.log(name + ":" + value);
+      try {
+        // console.log("submit", this.user);
+        this.isProcessing = true;
+
+        const { data } = await userAPI.update({
+          userId: this.user.id,
+          formData,
+        });
+        // this.$store.commit("setCurrentUser", this.user);
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.$router.push({
+          name: "user-profile",
+          params: { id: this.user.id },
+        });
+      } catch (error) {
+        this.isProcessing = false;
+        console.log(error);
+        Toast.fire({
+          icon: "error",
+          title: "更新失敗",
+        });
       }
     },
   },
